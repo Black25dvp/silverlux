@@ -71,6 +71,7 @@ const Index = () => {
                 category={product.category}
                 onAddToCart={() => addToCart({
                   id: product.id,
+                  product_id: product.id,
                   name: product.name,
                   price: product.price,
                   image_url: product.image_url
