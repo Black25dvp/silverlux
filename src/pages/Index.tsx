@@ -1,62 +1,47 @@
+import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
-import ProductCard from "@/components/ProductCard";
 import CategorySection from "@/components/CategorySection";
+import ProductCard from "@/components/ProductCard";
 import Footer from "@/components/Footer";
+import { supabase } from "@/integrations/supabase/client";
+import { useCart } from "@/contexts/CartContext";
+import { toast } from "sonner";
 
-import bracelet1 from "@/assets/bracelet-1.jpg";
-import bracelet2 from "@/assets/bracelet-2.jpg";
-import bracelet3 from "@/assets/bracelet-3.jpg";
 import necklaces from "@/assets/necklaces.jpg";
 import rings from "@/assets/rings.jpg";
 import earrings from "@/assets/earrings.jpg";
 
-const products = [
-  {
-    id: 1,
-    name: "Pulseira Círculos Interligados",
-    price: 289.90,
-    image: bracelet1,
-    category: "Pulseiras"
-  },
-  {
-    id: 2,
-    name: "Pulseira Árvore da Vida Dourada",
-    price: 349.90,
-    image: bracelet2,
-    category: "Pulseiras"
-  },
-  {
-    id: 3,
-    name: "Pulseira Estrela do Mar",
-    price: 279.90,
-    image: bracelet3,
-    category: "Pulseiras"
-  },
-  {
-    id: 4,
-    name: "Colar com Pingente de Pedra",
-    price: 459.90,
-    image: necklaces,
-    category: "Colares"
-  },
-  {
-    id: 5,
-    name: "Anel Solitário com Gema",
-    price: 329.90,
-    image: rings,
-    category: "Anéis"
-  },
-  {
-    id: 6,
-    name: "Brincos Círculo Elegante",
-    price: 249.90,
-    image: earrings,
-    category: "Brincos"
-  }
-];
+interface Product {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  image_url: string;
+  category: string;
+}
 
 const Index = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const { addToCart } = useCart();
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
+  const loadProducts = async () => {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      toast.error('Erro ao carregar produtos');
+    } else {
+      setProducts(data || []);
+    }
+  };
+
   return (
     <div className="min-h-screen">
       <Header />
@@ -77,7 +62,20 @@ const Index = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {products.map((product) => (
-              <ProductCard key={product.id} {...product} />
+              <ProductCard 
+                key={product.id}
+                id={product.id}
+                name={product.name}
+                price={product.price}
+                image={product.image_url}
+                category={product.category}
+                onAddToCart={() => addToCart({
+                  id: product.id,
+                  name: product.name,
+                  price: product.price,
+                  image_url: product.image_url
+                })}
+              />
             ))}
           </div>
         </div>

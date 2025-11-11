@@ -3,13 +3,15 @@ import { Button } from "@/components/ui/button";
 import { ShoppingCart } from "lucide-react";
 
 interface ProductCardProps {
+  id: string;
   name: string;
   price: number;
   image: string;
   category: string;
+  onAddToCart?: () => void;
 }
 
-const ProductCard = ({ name, price, image, category }: ProductCardProps) => {
+const ProductCard = ({ name, price, image, category, onAddToCart }: ProductCardProps) => {
   return (
     <Card className="group overflow-hidden border-border hover:shadow-elegant transition-all duration-300 hover:-translate-y-1">
       <div className="aspect-square overflow-hidden bg-silver-light">
@@ -32,7 +34,12 @@ const ProductCard = ({ name, price, image, category }: ProductCardProps) => {
           <p className="text-2xl font-bold text-foreground">
             R$ {price.toFixed(2)}
           </p>
-          <Button size="icon" variant="outline" className="group-hover:bg-accent group-hover:text-accent-foreground group-hover:border-accent transition-colors">
+          <Button 
+            size="icon" 
+            variant="outline" 
+            className="group-hover:bg-accent group-hover:text-accent-foreground group-hover:border-accent transition-colors"
+            onClick={onAddToCart}
+          >
             <ShoppingCart className="h-4 w-4" />
           </Button>
         </div>
