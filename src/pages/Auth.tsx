@@ -13,11 +13,10 @@ const authSchema = z.object({
 });
 
 const Auth = () => {
-  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn, signUp, user } = useAuth();
+  const { signIn, user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,26 +32,17 @@ const Auth = () => {
       const validated = authSchema.parse({ email, password });
       setLoading(true);
 
-      const { error } = isLogin
-        ? await signIn(validated.email, validated.password)
-        : await signUp(validated.email, validated.password);
+      const { error } = await signIn(validated.email, validated.password);
 
       if (error) {
         if (error.message.includes('Invalid login credentials')) {
           toast.error('Email ou senha incorretos');
-        } else if (error.message.includes('User already registered')) {
-          toast.error('Este email já está cadastrado');
         } else {
           toast.error(error.message);
         }
       } else {
-        if (!isLogin) {
-          toast.success('Conta criada com sucesso! Faça login para continuar.');
-          setIsLogin(true);
-        } else {
-          toast.success('Login realizado com sucesso!');
-          navigate('/');
-        }
+        toast.success('Login realizado com sucesso!');
+        navigate('/');
       }
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -71,8 +61,11 @@ const Auth = () => {
             Silver<span className="text-accent">Luxe</span>
           </h1>
           <h2 className="mt-6 text-2xl font-bold text-foreground">
-            {isLogin ? 'Entrar na sua conta' : 'Criar nova conta'}
+            Acesso Administrativo
           </h2>
+          <p className="mt-2 text-muted-foreground">
+            Entre com suas credenciais de administrador
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
@@ -102,20 +95,8 @@ const Auth = () => {
           </div>
 
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Processando...' : isLogin ? 'Entrar' : 'Criar Conta'}
+            {loading ? 'Processando...' : 'Entrar'}
           </Button>
-
-          <div className="text-center">
-            <button
-              type="button"
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-sm text-accent hover:underline"
-            >
-              {isLogin
-                ? 'Não tem uma conta? Criar conta'
-                : 'Já tem uma conta? Fazer login'}
-            </button>
-          </div>
         </form>
       </div>
     </div>
