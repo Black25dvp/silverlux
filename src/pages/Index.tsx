@@ -8,10 +8,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
 
-import necklaces from "@/assets/necklaces.jpg";
-import rings from "@/assets/rings.jpg";
-import earrings from "@/assets/earrings.jpg";
-
 interface Product {
   id: string;
   name: string;
@@ -21,12 +17,22 @@ interface Product {
   category: string;
 }
 
+interface Collection {
+  id: string;
+  name: string;
+  description: string | null;
+  image_url: string;
+  is_sold_out: boolean;
+}
+
 const Index = () => {
   const [products, setProducts] = useState<Product[]>([]);
+  const [collections, setCollections] = useState<Collection[]>([]);
   const { addToCart } = useCart();
 
   useEffect(() => {
     loadProducts();
+    loadCollections();
   }, []);
 
   const loadProducts = async () => {
@@ -39,6 +45,19 @@ const Index = () => {
       toast.error('Erro ao carregar produtos');
     } else {
       setProducts(data || []);
+    }
+  };
+
+  const loadCollections = async () => {
+    const { data, error } = await supabase
+      .from('collections')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      toast.error('Erro ao carregar coleções');
+    } else {
+      setCollections(data || []);
     }
   };
 
@@ -94,27 +113,23 @@ const Index = () => {
             </p>
           </div>
 
-          <CategorySection
-            title="Colares Elegantes"
-            description="Nossa coleção de colares combina design sofisticado com a pureza da prata 925. 
-            Cada peça é criada para realçar sua beleza natural, perfeita para qualquer ocasião especial."
-            image={necklaces}
-          />
-
-          <CategorySection
-            title="Anéis Exclusivos"
-            description="Anéis que contam histórias. Com pedras preciosas cuidadosamente selecionadas 
-            e design único, cada anel é uma obra de arte em prata que complementa seu estilo."
-            image={rings}
-            reverse
-          />
-
-          <CategorySection
-            title="Brincos Sofisticados"
-            description="Detalhes que fazem a diferença. Nossos brincos em prata 925 são desenhados 
-            para adicionar um toque de elegância e sofisticação ao seu visual."
-            image={earrings}
-          />
+          {collections.length === 0 ? (
+            <div className="text-center py-20">
+              <p className="text-muted-foreground">Nenhuma coleção disponível no momento</p>
+            </div>
+          ) : (
+            collections.map((collection, index) => (
+              <CategorySection
+                key={collection.id}
+                id={collection.id}
+                title={collection.name}
+                description={collection.description || ''}
+                image={collection.image_url}
+                isSoldOut={collection.is_sold_out}
+                reverse={index % 2 !== 0}
+              />
+            ))
+          )}
         </div>
       </section>
 
