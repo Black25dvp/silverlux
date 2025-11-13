@@ -27,16 +27,16 @@ const Header = () => {
             </a>
             
             <nav className="hidden md:flex items-center gap-6">
-              <a href="#produtos" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
+              <Link to="/products" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
                 Produtos
-              </a>
-              <a href="#colecoes" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
+              </Link>
+              <a href="/#colecoes" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
                 Coleções
               </a>
-              <a href="#sobre" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
+              <a href="/#sobre" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
                 Sobre
               </a>
-              <a href="#contato" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
+              <a href="/#contato" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
                 Contato
               </a>
             </nav>
