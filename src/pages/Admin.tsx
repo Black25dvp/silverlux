@@ -19,6 +19,7 @@ interface Product {
   price: number;
   image_url: string;
   category: string;
+  location: string | null;
 }
 
 interface Collection {
@@ -41,7 +42,8 @@ const Admin = () => {
     description: '',
     price: '',
     image_url: '',
-    category: ''
+    category: '',
+    location: 'São Paulo, São Paulo'
   });
   const [collectionFormData, setCollectionFormData] = useState({
     name: '',
@@ -86,7 +88,8 @@ const Admin = () => {
       description: formData.description,
       price: parseFloat(formData.price),
       image_url: formData.image_url,
-      category: formData.category
+      category: formData.category,
+      location: formData.location
     };
 
     if (editingId) {
@@ -125,7 +128,8 @@ const Admin = () => {
       description: product.description || '',
       price: product.price.toString(),
       image_url: product.image_url,
-      category: product.category
+      category: product.category,
+      location: product.location || 'São Paulo, São Paulo'
     });
   };
 
@@ -151,7 +155,8 @@ const Admin = () => {
       description: '',
       price: '',
       image_url: '',
-      category: ''
+      category: '',
+      location: 'São Paulo, São Paulo'
     });
   };
 
@@ -364,6 +369,16 @@ const Admin = () => {
                     id="category"
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="location">Localização</Label>
+                  <Input
+                    id="location"
+                    value={formData.location}
+                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                    placeholder="Ex: São Paulo, São Paulo"
                     required
                   />
                 </div>
