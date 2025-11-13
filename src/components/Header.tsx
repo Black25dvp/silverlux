@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
+import SearchDialog from "@/components/SearchDialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,6 +14,7 @@ import {
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const { totalItems } = useCart();
   const { user, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
@@ -43,7 +45,12 @@ const Header = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" className="hidden sm:flex">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="hidden sm:flex"
+              onClick={() => setSearchOpen(true)}
+            >
               <Search className="h-5 w-5" />
             </Button>
             <Link to="/cart">
@@ -108,6 +115,8 @@ const Header = () => {
           </nav>
         )}
       </div>
+      
+      <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
     </header>
   );
 };
