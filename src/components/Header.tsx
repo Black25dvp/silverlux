@@ -1,4 +1,4 @@
-import { ShoppingBag, Search, Menu, User, LogOut, Settings } from "lucide-react";
+import { ShoppingBag, Search, Menu, User, LogOut, Settings, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useCart } from "@/contexts/CartContext";
@@ -6,18 +6,30 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import SearchDialog from "@/components/SearchDialog";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Separator } from "@/components/ui/separator";
 
 const Header = () => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const { totalItems } = useCart();
   const { user, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
+
+  const handleNavigate = (path: string) => {
+    navigate(path);
+    setDrawerOpen(false);
+  };
+
+  const handleHashNavigate = (hash: string) => {
+    setDrawerOpen(false);
+    window.location.hash = hash;
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -64,56 +76,91 @@ const Header = () => {
               </Button>
             </Link>
             
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
+            <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="md:hidden">
                   <Menu className="h-5 w-5" />
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                {user ? (
-                  <>
-                    {isAdmin && (
-                      <DropdownMenuItem onClick={() => navigate('/admin')}>
-                        <Settings className="mr-2 h-4 w-4" />
-                        Administração
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuItem onClick={() => signOut()}>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Sair
-                    </DropdownMenuItem>
-                  </>
-                ) : (
-                  <DropdownMenuItem onClick={() => navigate('/auth')}>
-                    <User className="mr-2 h-4 w-4" />
-                    Entrar
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuItem onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden">
-                  Menu
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[280px] sm:w-[320px]">
+                <SheetHeader className="mb-6">
+                  <SheetTitle className="text-2xl font-serif">
+                    Silver<span className="text-accent">Luxe</span>
+                  </SheetTitle>
+                </SheetHeader>
+                
+                <nav className="flex flex-col gap-1">
+                  <Button
+                    variant="ghost"
+                    className="justify-start text-base font-medium"
+                    onClick={() => handleNavigate('/products')}
+                  >
+                    Produtos
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="justify-start text-base font-medium"
+                    onClick={() => handleHashNavigate('#colecoes')}
+                  >
+                    Coleções
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="justify-start text-base font-medium"
+                    onClick={() => handleHashNavigate('#sobre')}
+                  >
+                    Sobre
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="justify-start text-base font-medium"
+                    onClick={() => handleHashNavigate('#contato')}
+                  >
+                    Contato
+                  </Button>
+                  
+                  <Separator className="my-4" />
+                  
+                  {user ? (
+                    <>
+                      {isAdmin && (
+                        <Button
+                          variant="ghost"
+                          className="justify-start text-base"
+                          onClick={() => handleNavigate('/admin')}
+                        >
+                          <Settings className="mr-2 h-4 w-4" />
+                          Administração
+                        </Button>
+                      )}
+                      <Button
+                        variant="ghost"
+                        className="justify-start text-base"
+                        onClick={() => {
+                          signOut();
+                          setDrawerOpen(false);
+                        }}
+                      >
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Sair
+                      </Button>
+                    </>
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      className="justify-start text-base"
+                      onClick={() => handleNavigate('/auth')}
+                    >
+                      <User className="mr-2 h-4 w-4" />
+                      Entrar
+                    </Button>
+                  )}
+                </nav>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
 
-        {mobileMenuOpen && (
-          <nav className="md:hidden py-4 flex flex-col gap-4 border-t border-border">
-            <a href="#produtos" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
-              Produtos
-            </a>
-            <a href="#colecoes" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
-              Coleções
-            </a>
-            <a href="#sobre" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
-              Sobre
-            </a>
-            <a href="#contato" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
-              Contato
-            </a>
-          </nav>
-        )}
       </div>
       
       <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
