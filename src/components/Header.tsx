@@ -93,6 +93,17 @@ const Header = () => {
                   <Button
                     variant="ghost"
                     className="justify-start text-base font-medium"
+                    onClick={() => {
+                      setDrawerOpen(false);
+                      setSearchOpen(true);
+                    }}
+                  >
+                    <Search className="mr-2 h-4 w-4" />
+                    Buscar
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="justify-start text-base font-medium"
                     onClick={() => handleNavigate('/products')}
                   >
                     Produtos
