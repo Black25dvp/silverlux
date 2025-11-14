@@ -59,7 +59,7 @@ const SearchDialog = ({ open, onOpenChange }: SearchDialogProps) => {
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
     const { data: searches, error } = await supabase
-      .from('product_searches')
+      .from('product_searches' as any)
       .select('product_id')
       .gte('created_at', thirtyDaysAgo.toISOString());
 
@@ -69,7 +69,7 @@ const SearchDialog = ({ open, onOpenChange }: SearchDialogProps) => {
     }
 
     // Count occurrences
-    const productCounts = searches.reduce((acc: Record<string, number>, search) => {
+    const productCounts = (searches as any[]).reduce((acc: Record<string, number>, search: any) => {
       if (search.product_id) {
         acc[search.product_id] = (acc[search.product_id] || 0) + 1;
       }
@@ -78,7 +78,7 @@ const SearchDialog = ({ open, onOpenChange }: SearchDialogProps) => {
 
     // Get top 5 products
     const topProductIds = Object.entries(productCounts)
-      .sort(([, a], [, b]) => b - a)
+      .sort(([, a], [, b]) => (b as number) - (a as number))
       .slice(0, 5)
       .map(([id]) => id);
 
@@ -132,8 +132,9 @@ const SearchDialog = ({ open, onOpenChange }: SearchDialogProps) => {
     saveRecentSearch(finalTerm);
     
     // Track search
+    // Track search
     await supabase
-      .from('product_searches')
+      .from('product_searches' as any)
       .insert({
         search_term: finalTerm,
         user_id: user?.id || null
@@ -147,7 +148,7 @@ const SearchDialog = ({ open, onOpenChange }: SearchDialogProps) => {
   const handleProductClick = async (product: Product) => {
     // Track product view
     await supabase
-      .from('product_searches')
+      .from('product_searches' as any)
       .insert({
         product_id: product.id,
         search_term: searchTerm || null,

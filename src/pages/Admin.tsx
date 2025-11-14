@@ -19,7 +19,7 @@ interface Product {
   price: number;
   image_url: string;
   category: string;
-  location: string | null;
+  location?: string | null;
 }
 
 interface Collection {
