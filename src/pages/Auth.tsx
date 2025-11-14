@@ -6,6 +6,8 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { z } from 'zod';
+import Header from '@/components/Header';
+import { Card } from '@/components/ui/card';
 
 const authSchema = z.object({
   email: z.string().trim().email({ message: 'Email inválido' }).max(255),
@@ -66,62 +68,77 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-serif font-bold text-foreground">
-            Silver<span className="text-accent">Luxe</span>
-          </h1>
-          <h2 className="mt-6 text-2xl font-bold text-foreground">
-            {isLogin ? 'Entrar' : 'Criar Conta'}
-          </h2>
-          <p className="mt-2 text-muted-foreground">
-            {isLogin ? 'Entre com suas credenciais' : 'Crie sua conta para começar'}
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label htmlFor="password">Senha</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="mt-1"
-              />
-            </div>
+    <>
+      <Header />
+      <div className="min-h-screen flex items-center justify-center bg-background px-4 pt-20">
+        <Card className="w-full max-w-md p-8 shadow-lg">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-serif font-bold text-foreground">
+              {isLogin ? 'Bem-vindo de volta' : 'Criar sua conta'}
+            </h2>
+            <p className="mt-2 text-muted-foreground">
+              {isLogin ? 'Entre com suas credenciais para continuar' : 'Preencha os dados para criar sua conta'}
+            </p>
           </div>
 
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Processando...' : (isLogin ? 'Entrar' : 'Criar Conta')}
-          </Button>
-        </form>
-        
-        <div className="text-center">
-          <button
-            type="button"
-            onClick={() => setIsLogin(!isLogin)}
-            className="text-sm text-muted-foreground hover:text-foreground underline"
-          >
-            {isLogin ? 'Não tem uma conta? Criar conta' : 'Já tem uma conta? Entrar'}
-          </button>
-        </div>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="mt-1"
+                  placeholder="seu@email.com"
+                />
+              </div>
+              <div>
+                <Label htmlFor="password">Senha</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="mt-1"
+                  placeholder="••••••••"
+                />
+                {!isLogin && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Mínimo de 6 caracteres
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? 'Processando...' : (isLogin ? 'Entrar' : 'Criar Conta')}
+            </Button>
+          </form>
+          
+          <div className="mt-6 text-center">
+            <button
+              type="button"
+              onClick={() => setIsLogin(!isLogin)}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {isLogin ? (
+                <>
+                  Não tem uma conta? <span className="text-accent font-medium">Criar conta</span>
+                </>
+              ) : (
+                <>
+                  Já tem uma conta? <span className="text-accent font-medium">Entrar</span>
+                </>
+              )}
+            </button>
+          </div>
+        </Card>
       </div>
-    </div>
+    </>
   );
 };
 
