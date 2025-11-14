@@ -11,6 +11,7 @@ import { Pencil, Trash2, Plus, X } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import Header from '@/components/Header';
+import { z } from 'zod';
 
 interface Product {
   id: string;
@@ -29,6 +30,27 @@ interface Collection {
   image_url: string;
   is_sold_out: boolean;
 }
+
+// Validation schemas
+const productSchema = z.object({
+  name: z.string().trim().min(1, 'Nome é obrigatório').max(200, 'Nome muito longo'),
+  description: z.string().max(2000, 'Descrição muito longa').nullable().optional(),
+  price: z.number({ invalid_type_error: 'Preço inválido' })
+    .positive('Preço deve ser positivo')
+    .max(999999.99, 'Preço muito alto'),
+  image_url: z.string().url('URL da imagem inválida').max(500, 'URL muito longa'),
+  category: z.enum(['necklaces', 'rings', 'bracelets', 'earrings'], {
+    errorMap: () => ({ message: 'Categoria inválida' })
+  }),
+  location: z.string().max(200, 'Localização muito longa').optional().nullable(),
+});
+
+const collectionSchema = z.object({
+  name: z.string().trim().min(1, 'Nome é obrigatório').max(200, 'Nome muito longo'),
+  description: z.string().max(2000, 'Descrição muito longa').nullable().optional(),
+  image_url: z.string().url('URL da imagem inválida').max(500, 'URL muito longa'),
+  is_sold_out: z.boolean(),
+});
 
 const Admin = () => {
   const { user, isAdmin, loading } = useAuth();
@@ -83,40 +105,57 @@ const Admin = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const productData = {
-      name: formData.name,
-      description: formData.description,
-      price: parseFloat(formData.price),
-      image_url: formData.image_url,
-      category: formData.category,
-      location: formData.location
-    };
+    try {
+      const validated = productSchema.parse({
+        name: formData.name,
+        description: formData.description || null,
+        price: parseFloat(formData.price),
+        image_url: formData.image_url,
+        category: formData.category,
+        location: formData.location || null,
+      });
 
-    if (editingId) {
-      const { error } = await supabase
-        .from('products')
-        .update(productData)
-        .eq('id', editingId);
+      const productData = {
+        name: validated.name,
+        description: validated.description || null,
+        price: validated.price,
+        image_url: validated.image_url,
+        category: validated.category,
+        location: validated.location || null,
+      };
 
-      if (error) {
-        toast.error('Erro ao atualizar produto');
+      if (editingId) {
+        const { error } = await supabase
+          .from('products')
+          .update(productData)
+          .eq('id', editingId);
+
+        if (error) {
+          toast.error('Erro ao atualizar produto');
+        } else {
+          toast.success('Produto atualizado com sucesso');
+          setEditingId(null);
+          resetForm();
+          loadProducts();
+        }
       } else {
-        toast.success('Produto atualizado com sucesso');
-        setEditingId(null);
-        resetForm();
-        loadProducts();
+        const { error } = await supabase
+          .from('products')
+          .insert([productData]);
+
+        if (error) {
+          toast.error('Erro ao adicionar produto');
+        } else {
+          toast.success('Produto adicionado com sucesso');
+          resetForm();
+          loadProducts();
+        }
       }
-    } else {
-      const { error } = await supabase
-        .from('products')
-        .insert([productData]);
-
-      if (error) {
-        toast.error('Erro ao adicionar produto');
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(`Dados inválidos: ${error.errors[0].message}`);
       } else {
-        toast.success('Produto adicionado com sucesso');
-        resetForm();
-        loadProducts();
+        toast.error('Erro ao salvar produto');
       }
     }
   };
@@ -176,44 +215,59 @@ const Admin = () => {
   const handleCollectionSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const collectionData = {
-      name: collectionFormData.name,
-      description: collectionFormData.description,
-      image_url: collectionFormData.image_url,
-      is_sold_out: collectionFormData.is_sold_out
-    };
+    try {
+      const validated = collectionSchema.parse({
+        name: collectionFormData.name,
+        description: collectionFormData.description || null,
+        image_url: collectionFormData.image_url,
+        is_sold_out: collectionFormData.is_sold_out,
+      });
 
-    if (editingCollectionId) {
-      const { error } = await supabase
-        .from('collections')
-        .update(collectionData)
-        .eq('id', editingCollectionId);
+      const collectionData = {
+        name: validated.name,
+        description: validated.description || null,
+        image_url: validated.image_url,
+        is_sold_out: validated.is_sold_out,
+      };
 
-      if (error) {
-        toast.error('Erro ao atualizar coleção');
-      } else {
-        toast.success('Coleção atualizada com sucesso');
-        setEditingCollectionId(null);
-        resetCollectionForm();
-        loadCollections();
-        await updateCollectionProducts(editingCollectionId);
-      }
-    } else {
-      const { data, error } = await supabase
-        .from('collections')
-        .insert([collectionData])
-        .select()
-        .single();
+      if (editingCollectionId) {
+        const { error } = await supabase
+          .from('collections')
+          .update(collectionData)
+          .eq('id', editingCollectionId);
 
-      if (error) {
-        toast.error('Erro ao adicionar coleção');
-      } else {
-        toast.success('Coleção adicionada com sucesso');
-        if (data) {
-          await updateCollectionProducts(data.id);
+        if (error) {
+          toast.error('Erro ao atualizar coleção');
+        } else {
+          toast.success('Coleção atualizada com sucesso');
+          setEditingCollectionId(null);
+          resetCollectionForm();
+          loadCollections();
+          await updateCollectionProducts(editingCollectionId);
         }
-        resetCollectionForm();
-        loadCollections();
+      } else {
+        const { data, error } = await supabase
+          .from('collections')
+          .insert([collectionData])
+          .select()
+          .single();
+
+        if (error) {
+          toast.error('Erro ao adicionar coleção');
+        } else {
+          toast.success('Coleção adicionada com sucesso');
+          if (data) {
+            await updateCollectionProducts(data.id);
+          }
+          resetCollectionForm();
+          loadCollections();
+        }
+      }
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(`Dados inválidos: ${error.errors[0].message}`);
+      } else {
+        toast.error('Erro ao salvar coleção');
       }
     }
   };
