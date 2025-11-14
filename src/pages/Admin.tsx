@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import Header from '@/components/Header';
 import { z } from 'zod';
+import { ImageUpload } from '@/components/ImageUpload';
 
 interface Product {
   id: string;
@@ -409,12 +410,11 @@ const Admin = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="image_url">URL da Imagem</Label>
-                  <Input
-                    id="image_url"
+                  <Label>Imagem do Produto</Label>
+                  <ImageUpload
                     value={formData.image_url}
-                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                    required
+                    onChange={(url) => setFormData({ ...formData, image_url: url })}
+                    onClear={() => setFormData({ ...formData, image_url: '' })}
                   />
                 </div>
                 <div>
@@ -526,12 +526,11 @@ const Admin = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="collection-image">URL da Imagem</Label>
-                      <Input
-                        id="collection-image"
+                      <Label>Imagem da Coleção</Label>
+                      <ImageUpload
                         value={collectionFormData.image_url}
-                        onChange={(e) => setCollectionFormData({ ...collectionFormData, image_url: e.target.value })}
-                        required
+                        onChange={(url) => setCollectionFormData({ ...collectionFormData, image_url: url })}
+                        onClear={() => setCollectionFormData({ ...collectionFormData, image_url: '' })}
                       />
                     </div>
                     <div className="flex items-center gap-2">
